@@ -3,22 +3,23 @@
 #define OFF 0
 #define ON 1
 // https://github.com/RoboticsBrno/ServoESP32
-
+// https://randomnerdtutorials.com/solved-failed-to-connect-to-esp32-timed-out-waiting-for-packet-header/
+// https://www.bneware.com/blogPost/esp32_arduino_ide or https://blog.naver.com/roboholic84/220583130285
 ////////// motor
 Servo servo_top, servo_bot;
 
-const int servopin_top = 13;
-const int servopin_bot = 13;
+const int servopin_top = 27;
+const int servopin_bot = 25;
 
-const int rotate_idle = 00;
-const int rotate_off  = 00;
+const int rotate_idle = 30;
+const int rotate_off  = 180;
 const int rotate_on   = 00;
 
 const int _delay = 1000;
 
 ///////// server
-const char* ssid = "WIFI"
-const char* password = "PASSWORD"
+const char* ssid = "aaa";
+const char* password = "aaa";
 
 WiFiServer server(80);
 
@@ -34,6 +35,17 @@ void setup() {
   // put your setup code here, to run once:
   servo_top.attach(servopin_top);
   servo_bot.attach(servopin_bot);
+
+  
+  servo_top.write(180);
+//  delay(_delay);
+//  servo_top.write(0);
+//  delay(_delay);
+  
+  servo_bot.write(180);
+//  delay(_delay);
+//  servo_bot.write(0);
+//  delay(_delay);
 
   Serial.print("Connecting to ");
   Serial.println(ssid);
@@ -53,7 +65,8 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
 
-  servo_top.write(rotate_idle)
+  servo_top.write(rotate_idle);
+  servo_bot.write(rotate_idle);
 
   WiFiClient client = server.available();
 
@@ -78,16 +91,32 @@ void loop() {
 
             if (header.indexOf("GET /top/on") >= 0){
               Serial.println("top on");
-              switching(servo_top, rotate_on);
+              //switching(servo_top, rotate_on);
+              servo_top.write(rotate_on);
+              delay(_delay);
+              servo_top.write(rotate_idle);
+              delay(_delay);
             }else if (header.indexOf("GET /top/off") >= 0){
               Serial.println("top off");
-              switching(servo_top, rotate_off);
+//              servo_top = switching(servo_top, rotate_off);
+              servo_top.write(rotate_off);
+              delay(_delay);
+              servo_top.write(rotate_idle);
+              delay(_delay);
             }else if (header.indexOf("GET /bot/on") >= 0){
               Serial.println("bot on");
-              switching(servo_bot, rotate_on);
+//              servo_bot = switching(servo_bot, rotate_on);
+              servo_bot.write(rotate_on);
+              delay(_delay);
+              servo_bot.write(rotate_idle);
+              delay(_delay);
             }else if (header.indexOf("GET /bot/off") >= 0){
               Serial.println("bot off");
-              switching(servo_bot, rotate_off);
+//              servo_bot = switching(servo_bot, rotate_off);
+              servo_bot.write(rotate_off);
+              delay(_delay);
+              servo_bot.write(rotate_idle);
+              delay(_delay);
             }
             
 
@@ -100,7 +129,9 @@ void loop() {
             client.println("<style>body { text-align: center; font-family: \"Trebuchet MS\", Arial; margin-left:auto; margin-right:auto;}");
             client.println(".buttonoff { background-color: #195B6A; border: none; color: white; padding: 16px 40px;");
             client.println("text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer;}");
-            client.println(".buttonon {background-color: #77878A;}</style></head>");
+            client.println(".buttonon {background-color: #77878A; border: none; color: white; padding: 16px 40px;");
+            client.println("text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer;}");
+            client.println("</style></head>");
                      
             // Web Page
             client.println("</head><body><h1>Remote Light switch Controller!!!</h1>");
@@ -136,11 +167,17 @@ void loop() {
     Serial.println("Client disconnected.");
     Serial.println("");
   }
+
+  
 }
 
-void switching(Servo servo, int rotate){
+Servo switching(Servo servo, int rotate){
+  Serial.println("start rotate.");
   servo.write(rotate);
   delay(_delay);
   servo.write(rotate_idle);
   delay(_delay);
+  Serial.println("end rotate.");
+
+  return servo;
 }
