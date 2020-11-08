@@ -2,24 +2,35 @@
 #include <Servo.h>
 #define OFF 0
 #define ON 1
+
 // https://github.com/RoboticsBrno/ServoESP32
 // https://randomnerdtutorials.com/solved-failed-to-connect-to-esp32-timed-out-waiting-for-packet-header/
-// https://www.bneware.com/blogPost/esp32_arduino_ide or https://blog.naver.com/roboholic84/220583130285
+// https://www.bneware.com/blogPost/esp32_arduino_ide
+// https://blog.naver.com/roboholic84/220583130285
+// https://arsviator.blogspot.com/2018/11/esp32-static-ip-using-static-ip-address.htmlhttps://arsviator.blogspot.com/2018/11/esp32-static-ip-using-static-ip-address.html
 ////////// motor
 Servo servo_top, servo_bot;
 
 const int servopin_top = 27;
 const int servopin_bot = 25;
 
-const int rotate_idle = 30;
-const int rotate_off  = 180;
+const int rotate_idle = 45;
+const int rotate_off  = 110;
 const int rotate_on   = 00;
 
 const int _delay = 1000;
 
 ///////// server
-const char* ssid = "aaa";
-const char* password = "aaa";
+const char* ssid = "-----";
+const char* password = "-----";
+
+// set static ip
+IPAddress local_IP(0,0,0,0);
+IPAddress gateway(0,0,0,0);
+
+IPAddress subnet(255, 255, 255, 0);
+IPAddress primaryDNS(8, 8, 8, 8);
+IPAddress secondaryDNS(8, 8, 3, 3);
 
 WiFiServer server(80);
 
@@ -36,16 +47,10 @@ void setup() {
   servo_top.attach(servopin_top);
   servo_bot.attach(servopin_bot);
 
-  
-  servo_top.write(180);
-//  delay(_delay);
-//  servo_top.write(0);
-//  delay(_delay);
-  
-  servo_bot.write(180);
-//  delay(_delay);
-//  servo_bot.write(0);
-//  delay(_delay);
+  if (!WiFi.config(local_IP, gateway, subnet, primaryDNS, secondaryDNS)){
+    Serial.println("STA failed to configure");
+
+  }
 
   Serial.print("Connecting to ");
   Serial.println(ssid);
@@ -106,14 +111,14 @@ void loop() {
             }else if (header.indexOf("GET /bot/on") >= 0){
               Serial.println("bot on");
 //              servo_bot = switching(servo_bot, rotate_on);
-              servo_bot.write(rotate_on);
+              servo_bot.write(rotate_off);
               delay(_delay);
               servo_bot.write(rotate_idle);
               delay(_delay);
             }else if (header.indexOf("GET /bot/off") >= 0){
               Serial.println("bot off");
 //              servo_bot = switching(servo_bot, rotate_off);
-              servo_bot.write(rotate_off);
+              servo_bot.write(rotate_on);
               delay(_delay);
               servo_bot.write(rotate_idle);
               delay(_delay);
